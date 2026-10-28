@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Starter Kit</title>
+    <script>
+      // 첫 페인트 전에 저장된 테마를 적용해 화면이 번쩍이는 현상(FOUC)을 막는다.
+      // 'theme' 키와 클래스/color-scheme 처리는 ThemeProvider 와 동일하게 유지할 것
+      try {
+        var stored = localStorage.getItem('theme')
+        var dark =
+          stored === 'dark' ||
+          (stored !== 'light' &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches)
+        var resolved = dark ? 'dark' : 'light'
+        document.documentElement.classList.add(resolved)
+        document.documentElement.style.colorScheme = resolved
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
