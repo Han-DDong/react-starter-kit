@@ -2,23 +2,33 @@
 
 Vite + React 19 + TypeScript 기반의 프론트엔드 스타터 킷입니다.
 헤더/푸터 레이아웃, 랜딩 페이지, 다크 모드, 폼·데이터 예제가 준비되어 있어 바로 기능 개발을 시작할 수 있습니다.
+새 프로젝트마다 반복되는 초기 설정(레이아웃, 테마, 폼, 데이터 패칭, 테스트 환경)을 미리 갖춰 두었습니다.
+
+## 주요 기능
+
+- **공통 레이아웃**: 헤더, 푸터, 모바일 내비게이션을 갖춘 반응형 레이아웃과 랜딩 페이지
+- **다크 모드**: 테마 토큰 기반으로 라이트 / 다크 / 시스템을 일관되게 지원
+- **예제 모음**
+  - UI 갤러리: shadcn/ui 컴포넌트 (버튼, 입력, 오버레이, 피드백 등)
+  - 폼: 회원가입(서버 에러 처리), 문의하기, 다단계 폼 (React Hook Form + Zod)
+  - 데이터: 서버 사이드 테이블, 무한 스크롤, 낙관적 업데이트 (TanStack Query / Table)
+- **백엔드 없는 개발**: MSW 모킹으로 API 없이도 모든 예제가 동작
+- **테스트**: Vitest + Testing Library 단위 테스트, Playwright E2E (desktop / mobile)
 
 ## 기술 스택
 
-| 영역            | 사용 기술                                                |
-| --------------- | -------------------------------------------------------- |
-| 빌드            | Vite, React 19, TypeScript (strict)                      |
-| 라우팅          | React Router                                             |
-| 스타일 / UI     | Tailwind CSS v4, shadcn/ui                               |
-| 클라이언트 상태 | Zustand                                                  |
-| 서버 상태       | TanStack Query                                           |
-| 테이블          | TanStack Table                                           |
-| 폼 / 검증       | React Hook Form, Zod                                     |
-| HTTP            | Axios                                                    |
-| 유틸            | date-fns, use-debounce, react-intersection-observer      |
-| API 모킹        | MSW, @faker-js/faker                                     |
-| 품질 도구       | ESLint (typescript-eslint), Prettier, Husky, lint-staged |
-| 테스트          | Vitest + Testing Library, Playwright                     |
+- **빌드**: Vite, React 19, TypeScript (strict)
+- **라우팅**: React Router
+- **스타일 / UI**: Tailwind CSS v4, shadcn/ui
+- **클라이언트 상태**: Zustand
+- **서버 상태**: TanStack Query
+- **테이블**: TanStack Table
+- **폼 / 검증**: React Hook Form, Zod
+- **HTTP**: Axios
+- **유틸**: date-fns, use-debounce, react-intersection-observer
+- **API 모킹**: MSW, @faker-js/faker
+- **품질 도구**: ESLint (typescript-eslint), Prettier, Husky, lint-staged
+- **테스트**: Vitest + Testing Library, Playwright
 
 ## 시작하기
 
@@ -35,31 +45,27 @@ pnpm dev          # http://localhost:5173
 
 ## 스크립트
 
-| 명령어           | 설명                                                                           |
-| ---------------- | ------------------------------------------------------------------------------ |
-| `pnpm dev`       | 개발 서버 실행                                                                 |
-| `pnpm build`     | 타입 검사 후 프로덕션 빌드                                                     |
-| `pnpm preview`   | 빌드 결과 미리보기                                                             |
-| `pnpm lint`      | ESLint 검사 (`any` 사용 시 에러)                                               |
-| `pnpm typecheck` | TypeScript 타입 검사                                                           |
-| `pnpm format`    | Prettier로 전체 포맷                                                           |
-| `pnpm test`      | 단위 테스트 (Vitest)                                                           |
-| `pnpm test:e2e`  | E2E 테스트 (Playwright, 최초 1회 `pnpm exec playwright install chromium` 필요) |
+- `pnpm dev`: 개발 서버 실행
+- `pnpm build`: 타입 검사 후 프로덕션 빌드
+- `pnpm preview`: 빌드 결과 미리보기
+- `pnpm lint`: ESLint 검사 (`any` 사용 시 에러)
+- `pnpm typecheck`: TypeScript 타입 검사
+- `pnpm format`: Prettier로 전체 포맷
+- `pnpm test`: 단위 테스트 (Vitest)
+- `pnpm test:e2e`: E2E 테스트 (Playwright, 최초 1회 `pnpm exec playwright install chromium` 필요)
 
 ## 화면 구성
 
 모든 페이지는 로그인 없이 접근할 수 있고, 공통 레이아웃(헤더 + 본문 + 푸터)을 사용합니다.
 
-| 경로                  | 내용                                                                                  |
-| --------------------- | ------------------------------------------------------------------------------------- |
-| `/`                   | 랜딩 페이지 (Hero, 기술 스택, 기능 소개, 예제 바로가기)                               |
-| `/examples`           | 예제 모음 인덱스                                                                      |
-| `/examples/ui/:id`    | shadcn/ui 갤러리 (buttons, inputs, feedback, overlays, data-display)                  |
-| `/examples/forms/:id` | 폼 예제 (signup, contact, multistep): 필드 간 검증, 다양한 입력, 다단계               |
-| `/examples/data/:id`  | 데이터 예제 (table, infinite, todo): 서버 사이드 테이블, 무한 스크롤, 낙관적 업데이트 |
+- `/`: 랜딩 페이지 (Hero, 기술 스택, 기능 소개, 예제 바로가기)
+- `/examples`: 예제 모음 인덱스
+- `/examples/ui/:id`: shadcn/ui 갤러리 (buttons, inputs, feedback, overlays, data-display)
+- `/examples/forms/:id`: 폼 예제 (signup, contact, multistep): 필드 간 검증, 다양한 입력, 다단계
+- `/examples/data/:id`: 데이터 예제 (table, infinite, todo): 서버 사이드 테이블, 무한 스크롤, 낙관적 업데이트
+- `/login`: 로그인 체험 (로그인하면 헤더가 사용자 상태로 바뀜)
 
 예제는 하나씩 독립된 페이지로 열립니다. `/examples/forms` 같은 카테고리 주소는 인덱스의 해당 섹션(`/examples#forms`)으로 이동합니다.
-| `/login` | 로그인 체험 (로그인하면 헤더가 사용자 상태로 바뀜) |
 
 ## 폴더 구조
 
