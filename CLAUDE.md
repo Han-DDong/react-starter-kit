@@ -1,6 +1,31 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # 프로젝트 규칙
 
 Vite + React 19 SPA 스타터 킷입니다. 전역 규칙(한국어 주석/문서, 2칸 들여쓰기, `any` 금지, 반응형 필수)을 따릅니다.
+
+## 명령어
+
+패키지 매니저는 pnpm 이다.
+
+- `pnpm dev` — 개발 서버 (http://localhost:5173). `.env.development` 의 `VITE_ENABLE_MOCK=true` 로 MSW 가 켜져 백엔드 없이 동작한다.
+- `pnpm build` — `tsc -b` 후 `vite build`
+- `pnpm test` — Vitest 전체 실행 (jsdom, `src/**/*.test.{ts,tsx}` 만 대상)
+- 단일 테스트: `pnpm exec vitest run src/lib/api.test.ts` 또는 `pnpm exec vitest run -t "테스트 이름"`
+- `pnpm test:e2e` — Playwright (desktop + mobile 두 프로젝트). dev 서버를 자동 기동하며, 최초 1회 `pnpm exec playwright install chromium` 필요. 단일 파일은 `pnpm exec playwright test e2e/auth.spec.ts --project=desktop`
+- `pnpm format` / `pnpm format:check` — Prettier
+
+## 아키텍처 (여러 파일을 읽어야 보이는 부분)
+
+- **부팅 순서** (`src/main.tsx`): `setupApi()` → (모킹 켜져 있으면 `mocks/browser` 를 동적 import 해 MSW 시작) → React 렌더. MSW 활성 여부는 `import.meta.env.VITE_ENABLE_MOCK` 을 직접 비교해야 한다. `lib/env.ts` 객체를 거치면 빌드 시 정적 치환이 안 되어 운영 번들에 MSW 가 남는다.
+- **API 계층 주입**: `lib/api.ts` 는 `features/auth` 를 모른다. `app/setupApi.ts` 가 `configureApi({ getToken, onUnauthorized })` 로 인증 스토어를 연결하는 유일한 지점이다.
+- **라우팅** (`app/router.tsx`): 모든 페이지는 `lazyPage` 로 코드 스플리팅되고 `SiteLayout` 아래에 있다. 예제는 `examples/{ui|forms|data}/:id` 한 라우트가 카테고리별 페이지(`UiGalleryPage`/`FormsPage`/`DataPage`)의 id → 컴포넌트 매핑으로 분기한다. 카테고리 단독 주소는 `/examples#<category>` 로 리다이렉트된다. 현재 보호된 라우트는 없다 (`ProtectedRoute` 로 묶으면 된다).
+- **예제 레지스트리** (`features/examples/registry.ts`): 예제 인덱스, 랜딩, 푸터가 이 한 곳을 읽는다. 예제 추가 절차는 README 의 "새 기능 추가하기" 를 따른다.
+- **테스트 설정**: `vite.config.ts` 의 `test` 블록이 Vitest 설정을 겸한다. 공통 헬퍼는 `src/test/` (`renderWithProviders`, `setup.ts`), Node 테스트용 MSW 는 `mocks/server.ts`.
+- **경로 별칭**: `@/` → `src`. `vite.config.ts` 와 `tsconfig` paths 를 항상 함께 수정한다.
+- 의존성 버전(TypeScript 6, ESLint 9)이 고정된 이유는 README "알아둘 점" 참고. 임의로 올리지 않는다.
 
 ## 구조 규칙
 
