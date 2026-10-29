@@ -69,13 +69,19 @@ export function useTodos() {
 //  1) onMutate : 진행 중인 조회를 취소하고, 롤백용 스냅샷을 저장한 뒤 캐시를 먼저 바꾼다
 //  2) onError  : 서버가 실패하면 스냅샷으로 되돌린다
 //  3) onSettled: 성공/실패와 관계없이 서버 상태와 다시 맞춘다
+// 요청이 동시에 여러 건이면 스냅샷이 다른 요청의 변경을 덮어쓰고 재조회가 뒤 요청의
+// 낙관적 상태를 지우므로, 마지막 요청이 끝났을 때만 롤백/재조회한다.
 function useOptimisticTodoMutation<TVariables>(options: {
   mutationFn: (variables: TVariables) => Promise<unknown>
   update: (todos: Todo[], variables: TVariables) => Todo[]
 }) {
   const queryClient = useQueryClient()
+  // 진행 중인 mutation 수를 세려면 세 훅이 같은 키를 공유해야 한다
+  const isLastMutation = () =>
+    queryClient.isMutating({ mutationKey: dataKeys.todos }) <= 1
 
   return useMutation({
+    mutationKey: dataKeys.todos,
     mutationFn: options.mutationFn,
     onMutate: async (variables) => {
       await queryClient.cancelQueries({ queryKey: dataKeys.todos })
@@ -86,12 +92,21 @@ function useOptimisticTodoMutation<TVariables>(options: {
       return { previous }
     },
     onError: (_error, _variables, context) => {
-      queryClient.setQueryData(dataKeys.todos, context?.previous)
+      // 다른 요청이 진행 중이면 롤백을 미루고 마지막 재조회에 맡긴다
+      if (isLastMutation()) {
+        queryClient.setQueryData(dataKeys.todos, context?.previous)
+      }
     },
-    onSettled: () =>
-      queryClient.invalidateQueries({ queryKey: dataKeys.todos }),
+    onSettled: () => {
+      if (isLastMutation()) {
+        return queryClient.invalidateQueries({ queryKey: dataKeys.todos })
+      }
+    },
   })
 }
+
+// 서버 응답 전의 임시 항목인지 여부 (이 id 로는 토글/삭제 요청을 보낼 수 없다)
+export const isTempTodoId = (id: string) => id.startsWith('temp-')
 
 export function useAddTodo() {
   return useOptimisticTodoMutation<string>({
@@ -100,7 +115,7 @@ export function useAddTodo() {
     // 서버 id 를 모르므로 임시 id 로 먼저 보여준다 (onSettled 의 재조회로 교체된다)
     update: (todos, title) => [
       ...todos,
-      { id: `temp-${Date.now()}`, title, done: false },
+      { id: `temp-${crypto.randomUUID()}`, title, done: false },
     ],
   })
 }

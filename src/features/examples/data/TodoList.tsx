@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import {
+  isTempTodoId,
   useAddTodo,
   useDeleteTodo,
   useTodos,
@@ -59,6 +60,7 @@ export function TodoList() {
               <Checkbox
                 id={`todo-${todo.id}`}
                 checked={todo.done}
+                disabled={isTempTodoId(todo.id)}
                 onCheckedChange={() =>
                   toggleTodo.mutate(todo, {
                     onError: (e) => toast.error(e.message),
@@ -79,7 +81,12 @@ export function TodoList() {
                 variant="ghost"
                 size="icon-sm"
                 aria-label={`${todo.title} 삭제`}
-                onClick={() => deleteTodo.mutate(todo.id)}
+                disabled={isTempTodoId(todo.id)}
+                onClick={() =>
+                  deleteTodo.mutate(todo.id, {
+                    onError: (e) => toast.error(e.message),
+                  })
+                }
               >
                 <Trash2 />
               </Button>
