@@ -12,6 +12,7 @@ import {
   signupSchema,
   type SignupValues,
 } from '@/features/examples/forms/schemas'
+import { ApiError } from '@/lib/api'
 import { TAKEN_EMAIL } from '@/mocks/demoAccount'
 
 export function SignupForm() {
@@ -42,8 +43,14 @@ export function SignupForm() {
         toast.success('가입이 완료되었습니다')
         reset()
       },
-      // 서버가 알려준 에러(중복 이메일 등)를 해당 필드에 표시한다
-      onError: (error) => setError('email', { message: error.message }),
+      onError: (error) => {
+        // 중복 이메일(409)만 해당 필드에 표시하고, 네트워크/서버 오류는 토스트로 알린다
+        if (error instanceof ApiError && error.status === 409) {
+          setError('email', { message: error.message })
+        } else {
+          toast.error(error.message)
+        }
+      },
     })
   }
 
