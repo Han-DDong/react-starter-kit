@@ -8,7 +8,6 @@ import {
 } from '@/components/ui/card'
 import { LoginForm } from '@/features/auth/components/LoginForm'
 import { selectIsAuthenticated, useAuthStore } from '@/features/auth/store'
-import { env } from '@/lib/env'
 import { DEMO_ACCOUNT } from '@/mocks/demoAccount'
 
 export default function LoginPage() {
@@ -22,8 +21,9 @@ export default function LoginPage() {
       <Card>
         <CardHeader>
           <CardTitle>로그인 체험</CardTitle>
-          {/* 모킹 환경에서만 데모 계정을 안내한다 (운영 화면에는 노출하지 않음) */}
-          {env.VITE_ENABLE_MOCK === 'true' && (
+          {/* 모킹 환경에서만 데모 계정을 안내한다 (운영 화면에는 노출하지 않음).
+              env 객체를 거치면 정적 치환이 안 되어 운영 번들에 남으므로 직접 비교한다 */}
+          {import.meta.env.VITE_ENABLE_MOCK === 'true' && (
             <CardDescription>
               데모 계정: {DEMO_ACCOUNT.email} / {DEMO_ACCOUNT.password}
             </CardDescription>
