@@ -64,6 +64,22 @@ const statusFilters = [
 const isSortKey = (value: string): value is UserSortKey =>
   userSortKeys.some((key) => key === value)
 
+const sortKeyLabel: Record<UserSortKey, string> = {
+  name: '이름',
+  email: '이메일',
+  status: '상태',
+  createdAt: '가입일',
+}
+
+// 모바일에는 헤더 버튼이 없으므로 "키:방향" 조합을 Select 하나로 고른다
+const sortOptions = [
+  { value: 'none', label: '정렬 안 함' },
+  ...userSortKeys.flatMap((key) => [
+    { value: `${key}:asc`, label: `${sortKeyLabel[key]} ↑` },
+    { value: `${key}:desc`, label: `${sortKeyLabel[key]} ↓` },
+  ]),
+]
+
 // v9 는 사용할 기능을 명시적으로 등록한다 (정렬, 페이지네이션).
 // 서버가 정렬/페이지를 처리하므로 클라이언트용 row model 은 등록하지 않는다.
 // features 와 columns 는 렌더링마다 새로 만들지 않도록 모듈 스코프에 둔다.
@@ -93,6 +109,7 @@ const emptyRows: UserRow[] = [] // 데이터가 없을 때 매번 새 배열을 
 export function UsersTable() {
   const [search, setSearch] = useState('')
   const [debouncedSearch] = useDebounce(search, 300) // 입력이 멈춘 뒤에만 요청한다
+  const [appliedSearch, setAppliedSearch] = useState(debouncedSearch)
   const [status, setStatus] = useState<UserStatus | 'all'>('all')
   const [sorting, setSorting] = useState<SortingState>([])
   const [pagination, setPagination] = useState<PaginationState>({
@@ -111,6 +128,23 @@ export function UsersTable() {
   })
 
   const resetPage = () => setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+
+  // 검색어는 debounce 된 값이 쿼리에 반영되는 시점에 페이지를 리셋한다.
+  // 입력 즉시 리셋하면 이전 검색어 + 첫 페이지 조합으로 불필요한 요청이 나간다.
+  if (appliedSearch !== debouncedSearch) {
+    setAppliedSearch(debouncedSearch)
+    resetPage()
+  }
+
+  const sortValue =
+    sort && isSortKey(sort.id)
+      ? `${sort.id}:${sort.desc ? 'desc' : 'asc'}`
+      : 'none'
+  const handleMobileSortChange = (value: string | null) => {
+    const [id, direction] = (value ?? 'none').split(':')
+    setSorting(id === 'none' ? [] : [{ id, desc: direction === 'desc' }])
+    resetPage()
+  }
 
   const table = useTable({
     features,
@@ -140,10 +174,7 @@ export function UsersTable() {
             placeholder="이름 또는 이메일 검색"
             className="pl-8"
             value={search}
-            onChange={(event) => {
-              setSearch(event.target.value)
-              resetPage()
-            }}
+            onChange={(event) => setSearch(event.target.value)}
           />
         </div>
         <Select
@@ -160,6 +191,23 @@ export function UsersTable() {
           </SelectTrigger>
           <SelectContent>
             {statusFilters.map(({ value, label }) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {/* 모바일(md 미만)에서는 테이블 헤더가 없어 별도로 정렬을 고른다 */}
+        <Select
+          items={sortOptions}
+          value={sortValue}
+          onValueChange={handleMobileSortChange}
+        >
+          <SelectTrigger aria-label="정렬" className="w-full sm:w-40 md:hidden">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {sortOptions.map(({ value, label }) => (
               <SelectItem key={value} value={value}>
                 {label}
               </SelectItem>
